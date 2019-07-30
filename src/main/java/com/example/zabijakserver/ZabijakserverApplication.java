@@ -1,5 +1,9 @@
 package com.example.zabijakserver;
 
+import com.example.zabijakserver.Entities.Player;
+import com.example.zabijakserver.Repositories.GameRepository;
+import com.example.zabijakserver.Repositories.KillLogRepository;
+import com.example.zabijakserver.Repositories.PlayerRepository;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -31,34 +35,15 @@ public class ZabijakserverApplication {
 	@Bean
 	public CommandLineRunner demo(PlayerService service){
 		return (args) -> {
-			service.addPlayer("Tom", 0L, 1L);
-			service.addPlayer("David", 1L, 2L);
-			service.addPlayer("Petr", 2L, 3L);
-			service.addPlayer("Marta", 3L, 0L);
+
+			service.createGame("New Game 1", "MiroMiro", "Martin", "Dominik", "Stefan");
+			service.assignTargets(1L);
 
 
 
-			log.info("-------------------------------");
-
-			service.killTarget(1L);
-
-			log.info("-------------------------------");
-
-			killLogRepository.findByKillerId(1L).forEach(killLog -> {
-				log.info(killLog.toString());
-			});
-
-			log.info("-------------------------------");
-
-			service.createGame("New game" , new Player("Miro", 4L, 5L),
-										 new Player("Michal", 5L, 6L),
-					 					 new Player("Jakub", 6L, 4L)
-			);
-
-			service.killTarget(4L);
-			service.killTarget(4L);
 
 			service.createGame("New Game 2", "MiroMiro", "Martin", "Dominik", "Stefan");
+			service.assignTargets(2L);
 
 
 
@@ -69,6 +54,13 @@ public class ZabijakserverApplication {
 
 			log.info("-------------------------------");
 
+
+			service.killTarget(1L, 1);
+			service.killTarget(1L, 1);
+			service.killTarget(1L, 1);
+
+
+			log.info("-------------------------------");
 
 
 			gameRepository.findAll().forEach(game -> {
@@ -83,6 +75,7 @@ public class ZabijakserverApplication {
 			});
 
 			log.info("-------------------------------");
+
 
 
 			killLogRepository.findAll().forEach(killLog -> {

@@ -1,31 +1,38 @@
-package com.example.zabijakserver;
+package com.example.zabijakserver.Entities;
+
+import com.example.zabijakserver.Entities.Game;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import java.util.Set;
-import java.util.Timer;
-
 @Entity
-public class KillLog {
+public class KillLog implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty
     private Long id;
-    private Long killerId;
-    private Long targetId;
+    @JsonProperty
+    private Integer killerId;
+    @JsonProperty
+    private Integer targetId;
+    @JsonProperty
     private Timestamp killTime;
 
     @ManyToOne
     //Foreign Key
     @JoinColumn
+    @JsonIgnore
     private Game game;
 
 
     public KillLog() {};
 
-    public KillLog(Game game, Long killerId, Long targetId) {
+    public KillLog(Game game, Integer killerId, Integer targetId) {
         this.game = game;
         this.killerId = killerId;
         this.targetId = targetId;

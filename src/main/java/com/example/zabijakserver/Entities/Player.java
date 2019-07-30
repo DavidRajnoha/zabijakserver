@@ -1,22 +1,37 @@
-package com.example.zabijakserver;
+package com.example.zabijakserver.Entities;
+
+import com.example.zabijakserver.Views;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 @Entity
-public class Player {
+public class Player implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonView({Views.Player.class, Views.Game.class})
     private Long id;
-    private Long playerId;
+
+    @JsonView({Views.Player.class, Views.Game.class})
+    private Integer playerId;
+
+    @JsonView({Views.Player.class, Views.Game.class})
     private String name;
-    private Long targetId;
+
+    @JsonView({Views.Player.class, Views.Game.class})
+    private Integer targetId;
+
+    @JsonView({Views.Player.class, Views.Game.class})
     private Boolean isAlive = Boolean.TRUE;
 
     @ManyToOne
     //Foreign Key
     @JoinColumn
+    @JsonManagedReference
+    @JsonView(Views.Player.class)
     private Game game;
 
     protected Player() {
@@ -26,18 +41,17 @@ public class Player {
         this.name = name;
     }
 
-    public Player(String name, Long playerId, Long targetId) {
+    public Player(String name, Integer playerId) {
         this(name);
-        this.targetId = targetId;
         this.playerId = playerId;
     }
 
 
-    public void setTargetId(Long targetId) {
+    public void setTargetId(Integer targetId) {
         this.targetId = targetId;
     }
 
-    public Long getTargetId() {
+    public Integer getTargetId() {
         return targetId;
     }
 
@@ -54,14 +68,7 @@ public class Player {
     }
 
 
-    @Override
-    public String toString() {
-        return String.format("Player[id='%d', playerId='%d', firstName='%s', target='%d', game='%s']",
-                id, playerId, name, targetId, game);
-    }
-
-
-    public Long getPlayerId() {
+    public Integer getPlayerId() {
         return playerId;
     }
 
