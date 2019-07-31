@@ -5,9 +5,11 @@ import com.example.zabijakserver.Entities.KillLog;
 import com.example.zabijakserver.Entities.Player;
 import com.example.zabijakserver.Exceptions.InvalidPlayerException;
 import com.example.zabijakserver.Exceptions.ModifyingActiveGameException;
+import com.example.zabijakserver.Exceptions.PlayerIsNotAliveException;
 import com.example.zabijakserver.Repositories.GameRepository;
 import com.example.zabijakserver.Repositories.KillLogRepository;
 import com.example.zabijakserver.Repositories.PlayerRepository;
+import javassist.NotFoundException;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +36,7 @@ public class PlayerService{
     private static final Logger log = LoggerFactory.getLogger(ZabijakserverApplication.class);
 
 
-    public Player killTarget(Long gameId, Integer playerId){
+    public Player killTarget(Long gameId, Integer playerId) throws PlayerIsNotAliveException {
 
         log.info("Kill target was invoked");
         Player player;
@@ -42,6 +44,9 @@ public class PlayerService{
         Game game;
         try {
             player = playerRepository.findByGame_IdAndPlayerId(gameId, playerId);
+            if (!player.getAlive()) {
+                throw new PlayerIsNotAliveException("");
+            }
         } catch (IndexOutOfBoundsException e) {
             throw new InvalidPlayerException("Player with index: " + playerId + " does not exist in game with id: " + gameId);
         }
@@ -52,7 +57,6 @@ public class PlayerService{
         }
 
         game = player.getGame();
-
         player.setTargetId(target.getTargetId());
         target.setTargetId(null);
         target.setAlive(false);
@@ -75,15 +79,19 @@ public class PlayerService{
         return player;
     }
 
-    public Player addPlayer(Long gameId, String name) throws ModifyingActiveGameException {
-        if (gameRepository.findOneById(gameId).getActive()){
+    public Player addPlayer(Long gameId, String name) throws ModifyingActiveGameException, NotFoundException {
+        Game game = gameRepository.findOneById(gameId);
+        if (game == null) {throw new NotFoundException("");}
+
+        if (game.getActive()){
             throw new ModifyingActiveGameException("Cannot add player to the active game");
-        } else {
-            Player player = new Player(name, playerRepository.findByGame_Id(gameId).size() + 1);
-            player.setGame(gameRepository.findOneById(gameId));
-            playerRepository.save(player);
-            return player;
         }
+
+        Player player = new Player(name, playerRepository.findByGame_Id(gameId).size() + 1);
+        player.setGame(gameRepository.findOneById(gameId));
+        playerRepository.save(player);
+        return player;
+
     }
 
 
@@ -104,44 +112,53 @@ public class PlayerService{
         List<Player> players = new ArrayList<>();
         AtomicInteger playerId = new AtomicInteger(0);
 
-        playerNamesSet.forEach(playerName -> {
-            players.add(new Player(playerName, playerId.incrementAndGet()));
-        });
+        playerNamesSet.forEach(playerName -> players.add(new Player(playerName, playerId.incrementAndGet())));
 
         Game newGame = new Game(name, players);
         gameRepository.save(newGame);
         return newGame;
     }
 
-    public void assignTargets(Long gameId){
+    public List<Player> assignTargets(Long gameId) throws ModifyingActiveGameException, NotFoundException {
         List<Player> players = playerRepository.findByGame_Id(gameId);
+        Game game = gameRepository.findOneById(gameId);
+        if (game == null) throw new NotFoundException("");
+        if (game.getActive()) throw new ModifyingActiveGameException("");
+
         Collections.shuffle(players);
+
         for (int i = 0, playersSize = players.size(); i < playersSize; i++) {
             players.get(i).setTargetId(players.get((i+1)%playersSize).getPlayerId());
             playerRepository.save(players.get(i));
         }
-        Game game = gameRepository.findOneById(gameId);
         game.setActive(Boolean.TRUE);
         gameRepository.save(game);
+        return players;
     }
 
     public List<Game> getGames() {
         return gameRepository.findAll();
     }
 
-    public List<Player> getPlayers(Long gameId){
-        return  playerRepository.findByGame_Id(gameId);
+    public List<Player> getPlayers(Long gameId) throws NotFoundException {
+        List<Player> players = playerRepository.findByGame_Id(gameId);
+        if (players.isEmpty()) throw new NotFoundException("");
+        return players;
     }
 
-    public Game getGame(Long gameId){
-        return gameRepository.findOneById(gameId);
+    public Game getGame(Long gameId) throws NotFoundException {
+        Game game = gameRepository.findOneById(gameId);
+        if (game==null) throw new NotFoundException("");
+        return game;
     }
 
     public List<KillLog> getKilllogs() {
         return killLogRepository.findAll();
     }
 
-    public List<KillLog> getKillLog(Long gameId) {
-        return killLogRepository.findByGame_Id(gameId);
+    public List<KillLog> getKillLog(Long gameId) throws NotFoundException {
+        List<KillLog> killLogs = killLogRepository.findByGame_Id(gameId);
+        if (killLogs.isEmpty()) throw new NotFoundException("");
+        return killLogs;
     }
 }
