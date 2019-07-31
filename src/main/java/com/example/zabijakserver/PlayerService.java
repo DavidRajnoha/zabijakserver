@@ -63,15 +63,14 @@ public class PlayerService{
         game.addKillLog(killLog);
 
 
-        gameRepository.save(game);
-        killLogRepository.save(killLog);
-        playerRepository.save(player);
-        playerRepository.save(target);
-
         if (player.getTargetId() == null) {
-            gameRepository.findOneById(gameId).setActive(Boolean.FALSE);
+            game.setActive(Boolean.FALSE);
             //TODO: Set game as winned
         }
+
+        gameRepository.save(game);
+        playerRepository.save(player);
+        playerRepository.save(target);
 
         return player;
     }
@@ -109,7 +108,7 @@ public class PlayerService{
             players.add(new Player(playerName, playerId.incrementAndGet()));
         });
 
-        Game newGame = new Game(name, new HashSet<>(players));
+        Game newGame = new Game(name, players);
         gameRepository.save(newGame);
         return newGame;
     }

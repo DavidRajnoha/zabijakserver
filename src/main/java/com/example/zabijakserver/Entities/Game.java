@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,7 +34,7 @@ public class Game implements Serializable {
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     @JsonView(Views.Game.class)
-    private Set<Player> players;
+    private List<Player> players;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "game", cascade = CascadeType.ALL)
     @JsonView(Views.Game.class)
@@ -42,16 +44,12 @@ public class Game implements Serializable {
     public Game() {};
 
 
-    public Game(String name, Set<Player> players) {
-        this.players = new HashSet<>(players);
+    public Game(String name, List<Player> players) {
+        this.players = new ArrayList<>(players);
         this.players.forEach(x -> x.setGame(this));
         this.name = name;
         this.active = false;
         this.killLogs = new HashSet<>();
-    }
-
-    public Game(String name, Player... players) {
-        this(name, Stream.of(players).collect(Collectors.toSet()));
     }
 
 
@@ -61,10 +59,6 @@ public class Game implements Serializable {
 
     public void setActive(Boolean active) {
         this.active = active;
-    }
-
-    public Set<KillLog> getKillLogs() {
-        return killLogs;
     }
 
     public void addKillLog(KillLog killLog) {

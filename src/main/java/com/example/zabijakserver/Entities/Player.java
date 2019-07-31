@@ -35,15 +35,12 @@ public class Player implements Serializable {
     private Game game;
 
     protected Player() {
-    };
-
-    public Player(String name) {
-        this.name = name;
     }
 
     public Player(String name, Integer playerId) {
-        this(name);
+        this.name = name;
         this.playerId = playerId;
+        this.setAlive(Boolean.TRUE);
     }
 
 

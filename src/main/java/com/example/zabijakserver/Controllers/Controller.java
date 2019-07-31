@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//TODO: rewrite uri paths to the type /game/{gameId}/action
-
 @RestController
 public class Controller {
 
@@ -31,12 +29,12 @@ public class Controller {
     private
     ObjectMapper mapper = new ObjectMapper();
 
-    @RequestMapping("/game")
-    public String game(@RequestParam(value = "id", defaultValue = "1") Long id) throws JsonProcessingException {
-            return mapper.writerWithView(Views.Game.class).writeValueAsString(service.getGame(id));
+    @RequestMapping("/game/{gameId}")
+    public String game(@PathVariable(value = "gameId") Long gameId) throws JsonProcessingException {
+            return mapper.writerWithView(Views.Game.class).writeValueAsString(service.getGame(gameId));
     }
 
-    @GetMapping("/games")
+    @GetMapping("/game")
     @ResponseBody
     public String getGames() throws JsonProcessingException {
         return mapper.writerWithView(Views.Game.class).writeValueAsString(service.getGames());
@@ -54,9 +52,9 @@ public class Controller {
 
     }
 
-    @GetMapping("/game/add")
+    @GetMapping("/game/{gameId}/add/{name}")
     @ResponseBody
-    public String addPlayer(@RequestParam(value = "gameId") Long gameId, @RequestParam(value = "name") String playerName) throws JsonProcessingException {
+    public String addPlayer(@PathVariable(value = "gameId") Long gameId, @PathVariable(value = "name") String playerName) throws JsonProcessingException {
         try {
             return mapper.writerWithView(Views.Player.class).writeValueAsString(service.addPlayer(gameId, playerName));
         } catch (ModifyingActiveGameException e) {
@@ -65,39 +63,32 @@ public class Controller {
     }
 
 
-
-    /*TODO: Take Json as a parameter and change method type to POST*/
-    @GetMapping("/game/kill")
+    @GetMapping("/game/{gameId}/kill/{playerId}")
     @ResponseBody
-    public String killPlayer(@RequestParam(value = "gameId", defaultValue = "1") Long gameId,
-                             @RequestParam(value = "playerId", defaultValue = "0") Integer playerId) throws JsonProcessingException {
+    public String killPlayer(@PathVariable(value = "gameId") Long gameId,
+                             @PathVariable(value = "playerId") Integer playerId) throws JsonProcessingException {
          return  mapper.writerWithView(Views.Player.class).writeValueAsString(service.killTarget(gameId, playerId));
     }
 
 
-    @GetMapping("/game/players")
+    @GetMapping("/game/{gameId}/players")
     @ResponseBody
-    public String getPlayers(Long gameId) throws JsonProcessingException {
+    public String getPlayers(@PathVariable Long gameId) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writerWithView(Views.Player.class).writeValueAsString(service.getPlayers(gameId));
     }
 
 
 
-    @GetMapping("/game/start")
-    public @ResponseBody String startGame(Long gameId) throws JsonProcessingException {
+    @GetMapping("/game/{gameId}/start")
+    public @ResponseBody String startGame(@PathVariable Long gameId) throws JsonProcessingException {
         service.assignTargets(gameId);
         return mapper.writerWithView(Views.Player.class).writeValueAsString(service.getPlayers(gameId));
     }
 
-    @GetMapping("/game/killlogs")
+    @GetMapping("/game/{gameId}/killlogs")
     @ResponseBody
-    public String getKilllogs(@RequestParam(defaultValue = "-1") Long gameId) throws JsonProcessingException {
-        if (gameId == -1L){
-            return mapper.writeValueAsString(service.getKilllogs());
-        } else {
+    public String getGameKilllogs(@PathVariable() Long gameId) throws JsonProcessingException {
             return mapper.writeValueAsString(service.getKillLog(gameId));
-        }
     }
-
 }
