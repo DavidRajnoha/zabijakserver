@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Random;
 
 @Entity
 public class Player implements Serializable {
@@ -34,13 +35,20 @@ public class Player implements Serializable {
     @JsonView(Views.Player.class)
     private Game game;
 
+    @JsonView(Views.SinglePlayer.class)
+    private Long token;
+
     protected Player() {
     }
 
-    public Player(String name, Integer playerId) {
+    public Player(String name, Integer playerId, Game game) {
         this.name = name;
         this.playerId = playerId;
         this.setAlive(Boolean.TRUE);
+        this.setGame(game);
+        this.token = Long.parseLong(String.valueOf(game.getId()) +
+                playerId +
+                (new Random().nextInt(900) + 100));
     }
 
 
@@ -75,5 +83,9 @@ public class Player implements Serializable {
 
     public void setGame(Game game) {
         this.game = game;
+    }
+
+    public Long getToken() {
+        return token;
     }
 }

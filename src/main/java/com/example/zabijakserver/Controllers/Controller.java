@@ -1,10 +1,11 @@
 package com.example.zabijakserver.Controllers;
 
+import com.example.zabijakserver.Exceptions.EmtpyGameException;
+import com.example.zabijakserver.Exceptions.GameIsNotActiveException;
 import com.example.zabijakserver.Exceptions.ModifyingActiveGameException;
 import com.example.zabijakserver.Exceptions.PlayerIsNotAliveException;
 import com.example.zabijakserver.PlayerService;
 import com.example.zabijakserver.Repositories.GameRepository;
-import com.example.zabijakserver.Repositories.PlayerRepository;
 import com.example.zabijakserver.Views;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 
 @RestController
 public class Controller {
@@ -25,10 +25,6 @@ public class Controller {
     @Autowired
     private
     PlayerService service;
-
-    @Autowired
-    private
-    PlayerRepository playerRepository;
 
     private
     ObjectMapper mapper = new ObjectMapper();
@@ -71,49 +67,52 @@ public class Controller {
         }
     }
 
+    // PUT MAPPING PUT MAPPING PUT MAPPING
 
-
-    @PutMapping("/game/{gameId}/start")
-    public @ResponseBody String startGame(@PathVariable Long gameId) throws JsonProcessingException {
+    @PutMapping("/game/{gameToken}/start")
+    public @ResponseBody String startGame(@PathVariable Long gameToken) throws JsonProcessingException {
         try {
-            return mapper.writerWithView(Views.Player.class).writeValueAsString(service.assignTargets(gameId));
+            return mapper.writerWithView(Views.Player.class).writeValueAsString(service.assignTargets(gameToken));
         } catch (ModifyingActiveGameException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't start an active game", e);
         } catch (NotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Game with ID: "+gameId+" does not exist", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find game based on this token", e);
+        } catch (EmtpyGameException e) {
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, "You can't start game with less then three players");
         }
     }
 
-    @PutMapping("/game/{gameId}/kill/{playerId}")
+    @PutMapping("/game/kill/{playerToken}")
     @ResponseBody
-    public String killPlayer(@PathVariable(value = "gameId") Long gameId,
-                             @PathVariable(value = "playerId") Integer playerId) throws JsonProcessingException {
-
+    public String killPlayer(@PathVariable(value = "playerToken") Long playerToken) throws JsonProcessingException {
         try {
-            return  mapper.writerWithView(Views.Player.class).writeValueAsString(service.killTarget(gameId, playerId));
+            return  mapper.writerWithView(Views.Player.class).writeValueAsString(service.killTarget(playerToken));
         } catch (PlayerIsNotAliveException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't kill with not alive player ", e);
+        } catch (GameIsNotActiveException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't kill in a inactive game");
         }
     }
+    
+    //POST MAPPING POST MAPPING POST MAPPING
 
-    @PostMapping("/game/{gameId}/players/{name}")
+    @PostMapping("/game/{gameToken}/players/{name}")
     @ResponseBody
-    public String addPlayer(@PathVariable(value = "gameId") Long gameId, @PathVariable(value = "name") String playerName) throws JsonProcessingException {
+    public String addPlayer(@PathVariable(value = "gameToken") Long gameToken, @PathVariable(value = "name") String playerName) throws JsonProcessingException {
         try {
-            return mapper.writerWithView(Views.Player.class).writeValueAsString(service.addPlayer(gameId, playerName));
+            return mapper.writerWithView(Views.SinglePlayer.class).writeValueAsString(service.addPlayer(gameToken, playerName));
         } catch (ModifyingActiveGameException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't modify an active game", e);
         } catch (NotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Game with ID: "+gameId+" does not exist", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Game based on this token could noy be found", e);
         }
     }
 
     @PostMapping("/game")
     @ResponseBody
-    public String createGame(@RequestParam(value = "gameName", required = false, defaultValue = "random name") String gameName,
-                             @RequestParam(value = "names", required = false) List<String> names
+    public String createGame(@RequestParam(value = "gameName", required = false, defaultValue = "random name") String gameName
                              //TODO: Parameter passwords to enable connection from other device
     ) throws JsonProcessingException {
-        return mapper.writerWithView(Views.Game.class).writeValueAsString(service.createGame(gameName, names));
+        return mapper.writerWithView(Views.GamePrivate.class).writeValueAsString(service.createGame(gameName));
     }
 }

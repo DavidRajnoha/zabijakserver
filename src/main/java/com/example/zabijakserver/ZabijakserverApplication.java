@@ -36,14 +36,23 @@ public class ZabijakserverApplication {
 	public CommandLineRunner demo(PlayerService service){
 		return (args) -> {
 
-			service.createGame("New Game 1", "MiroMiro", "Martin", "Dominik", "Stefan");
-			service.assignTargets(1L);
+			Long tokenOne = service.createGame("New Game 1").getToken();
+			service.addPlayer(tokenOne, "Miro");
+			service.addPlayer(tokenOne, "Martin");
+			service.addPlayer(tokenOne, "Filip");
+			service.addPlayer(tokenOne, "Dominik");
+
+			service.assignTargets(tokenOne);
 
 
 
 
-			service.createGame("New Game 2", "MiroMiro", "Martin", "Dominik", "Stefan");
-			service.assignTargets(2L);
+			Long tokenTwo = service.createGame("New Game 2").getToken();
+			Long petrToken = service.addPlayer(tokenTwo, "Petr").getToken();
+			service.addPlayer(tokenTwo, "Stefan");
+			service.addPlayer(tokenTwo, "Milan");
+			service.addPlayer(tokenTwo, "Jeroným");
+			service.assignTargets(tokenTwo);
 
 
 
@@ -53,13 +62,9 @@ public class ZabijakserverApplication {
 			});
 
 			log.info("-------------------------------");
-
-
-			service.killTarget(1L, 1);
-			service.killTarget(1L, 1);
-			service.killTarget(1L, 1);
-
-
+			service.killTarget(petrToken);
+			service.killTarget(petrToken);
+			service.killTarget(petrToken);
 			log.info("-------------------------------");
 
 
