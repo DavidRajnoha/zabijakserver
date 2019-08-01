@@ -8,8 +8,6 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Entity
 public class Game implements Serializable {
@@ -35,7 +33,7 @@ public class Game implements Serializable {
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "game", cascade = CascadeType.ALL)
     @JsonView(Views.Game.class)
-    private Set<KillLog> killLogs;
+    private List<KillLog> killLogs;
 
     @JsonView(Views.GamePrivate.class)
     private Long token;
@@ -47,9 +45,8 @@ public class Game implements Serializable {
     public Game(String name) {
         this.name = name;
         this.active = false;
-        this.killLogs = new HashSet<>();
+        this.killLogs = new ArrayList<>();
     }
-
 
     public Boolean getActive() {
         return active;
@@ -73,5 +70,24 @@ public class Game implements Serializable {
 
     public void setToken(){
         this.token = Long.parseLong(String.valueOf(this.id) + (new Random().nextInt(9000)+1000));
+    }
+
+
+
+    //JUST FOR TESTING
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public List<KillLog> getKillLogs() {
+        return killLogs;
+    }
+
+    public void setToken(Long id){
+        this.token = Long.parseLong(String.valueOf(id) + (new Random().nextInt(9000)+1000));
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

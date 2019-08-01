@@ -4,7 +4,7 @@ import com.example.zabijakserver.Exceptions.EmtpyGameException;
 import com.example.zabijakserver.Exceptions.GameIsNotActiveException;
 import com.example.zabijakserver.Exceptions.ModifyingActiveGameException;
 import com.example.zabijakserver.Exceptions.PlayerIsNotAliveException;
-import com.example.zabijakserver.PlayerService;
+import com.example.zabijakserver.PlayerServiceImpl;
 import com.example.zabijakserver.Repositories.GameRepository;
 import com.example.zabijakserver.Views;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,7 +24,7 @@ public class Controller {
 
     @Autowired
     private
-    PlayerService service;
+    PlayerServiceImpl service;
 
     private
     ObjectMapper mapper = new ObjectMapper();

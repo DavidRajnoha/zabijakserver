@@ -1,6 +1,5 @@
 package com.example.zabijakserver;
 
-import com.example.zabijakserver.Entities.Player;
 import com.example.zabijakserver.Repositories.GameRepository;
 import com.example.zabijakserver.Repositories.KillLogRepository;
 import com.example.zabijakserver.Repositories.PlayerRepository;
@@ -19,6 +18,9 @@ public class ZabijakserverApplication {
 
 	private static final Logger log = LoggerFactory.getLogger(ZabijakserverApplication.class);
 
+	public ZabijakserverApplication() {
+	}
+
 	public static void main(String[] args) {
 		SpringApplication.run(ZabijakserverApplication.class, args);
 	}
@@ -32,8 +34,9 @@ public class ZabijakserverApplication {
 	@Autowired
 	private PlayerRepository playerRepository;
 
+
 	@Bean
-	public CommandLineRunner demo(PlayerService service){
+	public CommandLineRunner demo(PlayerServiceImpl service){
 		return (args) -> {
 
 			Long tokenOne = service.createGame("New Game 1").getToken();
