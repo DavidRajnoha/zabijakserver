@@ -9,13 +9,13 @@ import java.util.List;
 
 public interface PlayerService {
 
-     Player killTarget(Long token) throws PlayerIsNotAliveException, GameIsNotActiveException;
+     Player killTarget(Long token) throws PlayerIsNotAliveException, GameIsNotActiveException, InvalidPlayerException;
 
      Player addPlayer(Long gameToken, String name) throws ModifyingActiveGameException, NotFoundException;
 
      Game createGame(String name);
 
-     List<Player> assignTargets(Long gameToken) throws ModifyingActiveGameException, NotFoundException, EmtpyGameException;
+     List<Player> startGame(Long gameToken) throws ModifyingActiveGameException, NotFoundException, EmtpyGameException;
 
      List<Game> getGames();
 

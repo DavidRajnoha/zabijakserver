@@ -1,9 +1,6 @@
 package com.example.zabijakserver.Controllers;
 
-import com.example.zabijakserver.Exceptions.EmtpyGameException;
-import com.example.zabijakserver.Exceptions.GameIsNotActiveException;
-import com.example.zabijakserver.Exceptions.ModifyingActiveGameException;
-import com.example.zabijakserver.Exceptions.PlayerIsNotAliveException;
+import com.example.zabijakserver.Exceptions.*;
 import com.example.zabijakserver.PlayerServiceImpl;
 import com.example.zabijakserver.Repositories.GameRepository;
 import com.example.zabijakserver.Views;
@@ -23,11 +20,9 @@ public class Controller {
     private GameRepository gameRepository;
 
     @Autowired
-    private
-    PlayerServiceImpl service;
+    private PlayerServiceImpl service;
 
-    private
-    ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
     @GetMapping("/game/{gameId}")
     public String game(@PathVariable(value = "gameId") Long gameId) throws JsonProcessingException {
@@ -72,7 +67,7 @@ public class Controller {
     @PutMapping("/game/{gameToken}/start")
     public @ResponseBody String startGame(@PathVariable Long gameToken) throws JsonProcessingException {
         try {
-            return mapper.writerWithView(Views.Player.class).writeValueAsString(service.assignTargets(gameToken));
+            return mapper.writerWithView(Views.Player.class).writeValueAsString(service.startGame(gameToken));
         } catch (ModifyingActiveGameException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't start an active game", e);
         } catch (NotFoundException e) {
@@ -87,10 +82,10 @@ public class Controller {
     public String killPlayer(@PathVariable(value = "playerToken") Long playerToken) throws JsonProcessingException {
         try {
             return  mapper.writerWithView(Views.Player.class).writeValueAsString(service.killTarget(playerToken));
-        } catch (PlayerIsNotAliveException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't kill with not alive player ", e);
-        } catch (GameIsNotActiveException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't kill in a inactive game");
+        } catch (PlayerIsNotAliveException | GameIsNotActiveException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (InvalidPlayerException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
     

@@ -12,6 +12,8 @@ import java.util.*;
 @Entity
 public class Game implements Serializable {
 
+    //TODO: Modify the setters and getters in relationships to ensure consistency!!!!
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonSerialize
@@ -25,15 +27,15 @@ public class Game implements Serializable {
     private Timestamp created;
 
     @JsonView({Views.Player.class, Views.Game.class})
-    private Boolean active;
+    private Boolean active = false;
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
+    @OneToMany(targetEntity = Player.class, fetch = FetchType.LAZY, mappedBy = "game", cascade = CascadeType.ALL)
     @JsonView(Views.Game.class)
-    private List<Player> players;
+    private List<Player> players = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "game", cascade = CascadeType.ALL)
     @JsonView(Views.Game.class)
-    private List<KillLog> killLogs;
+    private List<KillLog> killLogs = new ArrayList<>();
 
     @JsonView(Views.GamePrivate.class)
     private Long token;
@@ -41,11 +43,8 @@ public class Game implements Serializable {
 
     public Game() {};
 
-
-    public Game(String name) {
+    public void setName(String name) {
         this.name = name;
-        this.active = false;
-        this.killLogs = new ArrayList<>();
     }
 
     public Boolean getActive() {
@@ -57,6 +56,7 @@ public class Game implements Serializable {
     }
 
     public void addKillLog(KillLog killLog) {
+
         this.killLogs.add(killLog);
     }
 
@@ -72,9 +72,26 @@ public class Game implements Serializable {
         this.token = Long.parseLong(String.valueOf(this.id) + (new Random().nextInt(9000)+1000));
     }
 
+    public void addPlayer(Player player){
+        if (this.players == null){
+            this.players = new ArrayList<>();
+        }
 
+        if (this.players.contains(player)) return;
 
-    //JUST FOR TESTING
+        this.players.add(player);
+
+        player.setGame(this);
+    }
+
+    public void removePlayer(Player player){
+        if (this.players == null || !this.players.contains(player)) return;
+
+        this.players.remove(player);
+
+        player.setGame(null);
+    }
+
     public List<Player> getPlayers() {
         return players;
     }
@@ -89,5 +106,13 @@ public class Game implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void setPlayers(List<Player> players) {
+        this.players = players;
+    }
+
+    public String getName() {
+        return this.name;
     }
 }

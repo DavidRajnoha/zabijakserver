@@ -1,4 +1,4 @@
-package com.example.zabijakserver;
+package com.example.zabijakserver.integration;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

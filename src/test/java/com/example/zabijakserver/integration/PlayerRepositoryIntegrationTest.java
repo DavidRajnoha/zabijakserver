@@ -1,4 +1,4 @@
-package com.example.zabijakserver;
+package com.example.zabijakserver.integration;
 
 
 import com.example.zabijakserver.Entities.Game;
@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.ArrayList;
 import java.util.List;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
@@ -79,13 +80,13 @@ public class PlayerRepositoryIntegrationTest {
     @Test
     public void findSavedGameById() {
         Game foundGame = gameRepository.findOneById(gameId);
-        assertThat(game.equals(foundGame));
+        assertThat(game).isEqualTo(foundGame);
     }
 
     @Test
     public void findSavedGameByToken() {
         Game foundGame = gameRepository.findOneByToken(gameToken);
-        assertThat(game.equals(foundGame));
+        assertThat(game).isEqualTo(foundGame);
     }
 
 
@@ -94,10 +95,10 @@ public class PlayerRepositoryIntegrationTest {
         //given
         players.forEach(player -> playerRepository.save(player));
         //when
-        List<Player> foundPlayerRepository = playerRepository.findByGame_Id(game.getId());
-        List<Player> foundGame = game.getPlayers();
+        List<Player> playersFromPlayerRepository = playerRepository.findByGame_Id(game.getId());
+        List<Player> playersFromGame = game.getPlayers();
         //then
-        assertThat (foundPlayerRepository.equals(foundGame));
+        assertThat(playersFromPlayerRepository).isEqualTo(playersFromGame);
     }
 
     @Test
@@ -108,7 +109,7 @@ public class PlayerRepositoryIntegrationTest {
         List<KillLog> foundKillLogRepository = killLogRepository.findByGame_Id(game.getId());
         List<KillLog> foundGame = game.getKillLogs();
         //then
-        assertThat (foundKillLogRepository.equals(foundGame));
+        assertThat(foundKillLogRepository).isEqualTo(foundGame);
     }
 
 

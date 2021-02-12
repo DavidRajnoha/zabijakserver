@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Random;
 
 @Entity
@@ -28,18 +29,21 @@ public class Player implements Serializable {
     @JsonView({Views.Player.class, Views.Game.class})
     private Boolean isAlive = Boolean.TRUE;
 
-    @ManyToOne
+    @JsonView({Views.Player.class, Views.Game.class})
+    private Boolean isWinner = Boolean.FALSE;
+
+    @ManyToOne (targetEntity = Game.class, fetch = FetchType.LAZY)
     //Foreign Key
-    @JoinColumn
     @JsonManagedReference
     @JsonView(Views.Player.class)
     private Game game;
 
     @JsonView(Views.SinglePlayer.class)
-    private Long token;
+    Long token;
 
-    protected Player() {
+    public Player() {
     }
+
 
     public Player(String name, Integer playerId, Game game) {
         this.name = name;
@@ -50,6 +54,15 @@ public class Player implements Serializable {
                 playerId +
                 (new Random().nextInt(900) + 100));
     }
+
+    public Player(String name, Integer playerId, Game game, Boolean bool) {
+        this.name = name;
+        this.playerId = playerId;
+        this.setAlive(Boolean.TRUE);
+        this.setGame(game);
+
+    }
+
 
 
     public void setTargetId(Integer targetId) {
@@ -72,7 +85,6 @@ public class Player implements Serializable {
         isAlive = alive;
     }
 
-
     public Integer getPlayerId() {
         return playerId;
     }
@@ -82,10 +94,42 @@ public class Player implements Serializable {
     }
 
     public void setGame(Game game) {
+        if (Objects.equals(this.game, game)) return;
+
+        if (this.game != null) this.game.removePlayer(this);
+
         this.game = game;
+
+        if (this.game != null) this.game.addPlayer(this);
     }
 
     public Long getToken() {
         return token;
+    }
+
+    //Just for testing
+
+    public void setToken(Long token) {
+        this.token = token;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setName(String playerName) {
+        this.name = name;
+    }
+
+    public Boolean getWinner() {
+        return isWinner;
+    }
+
+    public void setWinner(Boolean winner) {
+        isWinner = winner;
     }
 }

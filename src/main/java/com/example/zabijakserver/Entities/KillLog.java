@@ -43,4 +43,12 @@ public class KillLog implements Serializable {
     public String toString() {
         return "Player with ID: " + killerId + " has killed his target with ID: " + targetId + " on " + killTime + " in game: "+game;
     }
+
+    public Integer getKillerId() {
+        return killerId;
+    }
+
+    public Integer getTargetId() {
+        return targetId;
+    }
 }
